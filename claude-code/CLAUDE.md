@@ -55,6 +55,7 @@ Whenever the user makes a change in the **"user-global" / "global config"** scop
 
 **Then sync to the GitHub backup repo:**
 - Repo: `https://github.com/wusss1412/config-prompt`, working copy at `D:\workspace\config-prompt`.
+- **Scope: markdown only.** The backup repo mirrors `CLAUDE.md` and `my-global-config-prompt.md` — these are the *source of truth for intent*. Scripts referenced from `settings.json` (statusline `.ps1`, hooks `.js`, etc.) stay **local-only** and are regenerated from the prompt on a fresh machine; do not copy them into the repo. So when a hook/statusline script changes, the repo commit only carries the markdown updates that describe the new behavior.
 - **Local steps run automatically (no confirmation):** copy updated files into `D:\workspace\config-prompt\claude-code\` (overwriting; other subdirs like `codex/` are off-limits), then `git add claude-code/<file> ...` + `git commit -m "..."`. Chain these in a single Bash invocation to avoid index races with the user's parallel edits in the same repo.
 - Only stage paths under `claude-code/`. Never `git add .` / `git add -A` — the user's WIP in other subdirs must not be swept in.
 - **`git push` requires confirmation per the Network operations rule above.** Surface the staged commit (hash + message + file list) and wait for explicit go-ahead before pushing. The standing authorization for this repo selects the *destination*; it does not waive the push-time confirmation.

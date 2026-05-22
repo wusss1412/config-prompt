@@ -113,10 +113,14 @@ settings.json 的 hooks.SessionEnd 注册一个 Node 脚本,
     如果用户为这些全局配置文件设置了远程 git 备份仓库,
     本地改完后**自动**复制 → `git add` → `git commit` 到该仓库的对应子目录(本地步骤免确认),
     但 **`git push` 仍按下条 (4) 网络操作规则,推送前必须等用户点头**。
+    **备份范围只含 markdown**:仓库镜像的是 CLAUDE.md 与 my-global-config-prompt.md
+    这两份"意图源",settings.json 引用的脚本本体(statusline .ps1、hooks .js 等)
+    一律**只留本地**,换机时按 prompt 重新生成,不要复制进仓库。
+    所以脚本改动 → 仓库 commit 里只带描述该改动的 markdown 更新。
     硬约束:
       - cp + add + commit 串成一条 Bash 命令,避免与用户并行编辑产生的 index race。
-      - 只 stage 自己刚拷过去的文件,绝不 `git add .` / `git add -A`,
-        以免把用户在其他子目录里的 WIP 一起带走。
+      - 只 stage 自己刚拷过去的 markdown,绝不 `git add .` / `git add -A`,
+        以免把用户在其他子目录里的 WIP 或本地脚本一起带走。
       - 仓库授权只决定"推到哪",不豁免"推不推"的确认。
       - force-push / 破坏性 git 操作仍要单独确认,授权不涵盖。
     原因:这些文件互为参照,任一漂移都会让下次复刻或自动行为对不上账;
