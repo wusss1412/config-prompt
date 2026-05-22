@@ -41,3 +41,10 @@ Whenever the user makes a change in the **"user-global" / "global config"** scop
   - Hook/statusline script edit → that script + `my-global-config-prompt.md`'s description of it
 - Style for `my-global-config-prompt.md`: keep the existing Chinese prose and sectioned layout. Field names and filenames (`settings.json`, `MEMORY.md`, `hooks.SessionEnd`, etc.) are allowed; **absolute paths are not** — use relative descriptions like "用户级 .claude/ 下".
 - After updating, report the path(s) per the **Always report output paths** rule above.
+
+**Then sync to the GitHub backup repo automatically (no per-change confirmation):**
+- Repo: `https://github.com/wusss1412/config-prompt`, working copy at `D:\workspace\config-prompt`.
+- Copy the updated files into `D:\workspace\config-prompt\claude-code\` (overwriting). Files belonging to other tools (e.g. `codex/`) are off-limits.
+- Run `git add claude-code/<file> ...` + `git commit -m "..."` + `git push origin main` as **a single chained Bash invocation** — never split across calls, because the user often edits the same repo in parallel and a split sequence loses the stage to a concurrent `git reset`.
+- Only stage paths under `claude-code/`. Never `git add .` / `git add -A` — the user's WIP in other subdirs must not be swept in.
+- User granted durable, no-confirmation authorization for this specific repo on 2026-05-22. This authorization does **not** extend to other repos or to force-pushes / destructive git ops.
