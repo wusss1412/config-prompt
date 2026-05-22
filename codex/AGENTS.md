@@ -25,6 +25,14 @@ These rules apply to all Codex sessions unless the user explicitly overrides the
 - Even when filesystem sandboxing is disabled or approvals are reduced, keep these confirmation rules in force.
 - Treat hooks and these instructions as safety guardrails, not as permission to bypass user intent.
 
+## Global Configuration Sync
+
+- When Codex actually modifies global configuration or user-wide rule files, it must check whether related config-prompt files are still accurate.
+- Related config-prompt files include `codex/AGENTS.md`, `codex/my-global-config-prompt.md`, and `codex/config.toml.example` when the change affects their documented behavior.
+- Do not perform this check mechanically when no global configuration or user-wide rule file was modified.
+- If config-prompt files need updates, update them locally and create a git commit.
+- Before pushing to a remote repository, explain the network action and wait for user confirmation unless the user has already explicitly authorized that push in the current context.
+
 ## Key File Output Reporting
 
 - Whenever a task involves key file outputs, the final response must list each key output file in a list format.
