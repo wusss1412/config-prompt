@@ -22,6 +22,17 @@ Before deleting any file or directory, **first enumerate the targets** (absolute
 
 **Why:** Project roots tend to mix temp scripts, backups, intermediate artifacts and real outputs. Mis-delete risk is high enough that the rule is absolute.
 
+## Network operations require confirmation
+
+Any operation that sends data over the network — `git push`, posting messages (Slack/email/IM), calling external APIs, uploading files, opening PRs/issues — **requires explicit per-time confirmation**, even when the surrounding workflow is otherwise auto-approved. Local operations (file edits, `git add`, `git commit`, running tests/scripts) do not.
+
+**Why:** Network ops are visible to others, often irreversible, and frequently authoritative (a push lands in shared history; a message can't be unsent). Local ops can be safely undone before they leave the machine.
+
+**How to apply:**
+- Before any network call, surface what's about to happen (target URL/repo/recipient + a one-line payload summary) and wait for explicit go-ahead.
+- A standing authorization for a specific repo/workflow only authorizes the *destination*, never bypasses this confirmation step.
+- Apply this every time, not just on the first push of a session. The user should never be surprised by an outbound request.
+
 ## Sync global-config files on user-global changes
 
 Whenever the user makes a change in the **"user-global" / "global config"** scope (settings.json edits, new hooks, statusline changes, any preference that takes effect across all projects), after the real change lands, **also update every related global-config file** so they stay in sync with the actual config. Related files include:
@@ -42,9 +53,9 @@ Whenever the user makes a change in the **"user-global" / "global config"** scop
 - Style for `my-global-config-prompt.md`: keep the existing Chinese prose and sectioned layout. Field names and filenames (`settings.json`, `MEMORY.md`, `hooks.SessionEnd`, etc.) are allowed; **absolute paths are not** — use relative descriptions like "用户级 .claude/ 下".
 - After updating, report the path(s) per the **Always report output paths** rule above.
 
-**Then sync to the GitHub backup repo automatically (no per-change confirmation):**
+**Then sync to the GitHub backup repo:**
 - Repo: `https://github.com/wusss1412/config-prompt`, working copy at `D:\workspace\config-prompt`.
-- Copy the updated files into `D:\workspace\config-prompt\claude-code\` (overwriting). Files belonging to other tools (e.g. `codex/`) are off-limits.
-- Run `git add claude-code/<file> ...` + `git commit -m "..."` + `git push origin main` as **a single chained Bash invocation** — never split across calls, because the user often edits the same repo in parallel and a split sequence loses the stage to a concurrent `git reset`.
+- **Local steps run automatically (no confirmation):** copy updated files into `D:\workspace\config-prompt\claude-code\` (overwriting; other subdirs like `codex/` are off-limits), then `git add claude-code/<file> ...` + `git commit -m "..."`. Chain these in a single Bash invocation to avoid index races with the user's parallel edits in the same repo.
 - Only stage paths under `claude-code/`. Never `git add .` / `git add -A` — the user's WIP in other subdirs must not be swept in.
-- User granted durable, no-confirmation authorization for this specific repo on 2026-05-22. This authorization does **not** extend to other repos or to force-pushes / destructive git ops.
+- **`git push` requires confirmation per the Network operations rule above.** Surface the staged commit (hash + message + file list) and wait for explicit go-ahead before pushing. The standing authorization for this repo selects the *destination*; it does not waive the push-time confirmation.
+- Force-push and other destructive git ops always require separate, explicit confirmation regardless.

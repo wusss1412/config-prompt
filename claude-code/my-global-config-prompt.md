@@ -98,14 +98,24 @@ settings.json 的 hooks.SessionEnd 注册一个 Node 脚本,
     脚本本体改动→脚本本身 + prompt 中对它的描述。
 
     如果用户为这些全局配置文件设置了远程 git 备份仓库,
-    本地改完后**自动**复制 → commit → push 到该仓库的对应子目录,无需每次确认。
+    本地改完后**自动**复制 → `git add` → `git commit` 到该仓库的对应子目录(本地步骤免确认),
+    但 **`git push` 仍按下条 (4) 网络操作规则,推送前必须等用户点头**。
     硬约束:
-      - add / commit / push 串成一条 Bash 命令,避免与用户并行编辑产生的 index race。
+      - cp + add + commit 串成一条 Bash 命令,避免与用户并行编辑产生的 index race。
       - 只 stage 自己刚拷过去的文件,绝不 `git add .` / `git add -A`,
         以免把用户在其他子目录里的 WIP 一起带走。
-      - 授权范围仅限该具体仓库与普通 push;force-push / 破坏性 git 操作仍要单独确认。
+      - 仓库授权只决定"推到哪",不豁免"推不推"的确认。
+      - force-push / 破坏性 git 操作仍要单独确认,授权不涵盖。
     原因:这些文件互为参照,任一漂移都会让下次复刻或自动行为对不上账;
          远程备份能在换机或本地丢失时立刻恢复。
+
+(4) 网络操作必须先确认
+    任何对外发送数据的动作(git push、发消息、调外部 API、上传文件、开 PR/Issue)
+    都要在动手前向用户说明"目标 + 一句话载荷",拿到明确同意才能执行。
+    本地动作(写文件、git add、git commit、跑测试)不受此限。
+    原因:网络操作对外可见、常常不可逆;一旦发出就回不来,
+         本地动作还可以悄悄回退。
+    边界:对某仓库 / 某流程的长期授权只决定"目的地",不替代每次的发送确认。
 
 记忆文件按 Claude Code 约定写 frontmatter(name / description / metadata.type=feedback),
 正文用 "规则 → Why → How to apply" 三段结构。
