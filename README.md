@@ -1,10 +1,12 @@
-# config-propmt
+# config-prompt
 
 Personal dotfiles, configuration notes, and rebuild prompts.
 
 ## Contents
 
 - `codex/my-global-config-prompt.md` - Codex-specific prompt for rebuilding and maintaining the user global configuration layer.
+- `codex/AGENTS.md` - Portable Codex safety and workflow rules.
+- `codex/config.toml.example` - Public-safe Codex global configuration template.
 
 ## Notes
 

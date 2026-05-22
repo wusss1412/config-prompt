@@ -1,0 +1,41 @@
+# Codex user global configuration example.
+#
+# This file is a portable template, not a direct copy of the active local config.
+# Keep machine-specific absolute paths, hook trust hashes, credentials, and
+# private project names out of the public repository.
+
+approval_policy = "on-request"
+sandbox_mode = "danger-full-access"
+model = "gpt-5.5"
+model_auto_compact_token_limit = 220000
+check_for_update_on_startup = true
+
+# Example project trust entry. Replace with a local project path only in the
+# private active config.toml, not in this public template.
+[projects."<project-path>"]
+trust_level = "trusted"
+
+[tui]
+theme = "dark-daltonized"
+status_line = ["model-with-reasoning", "current-dir", "git-branch", "context-used"]
+status_line_use_colors = false
+hide_full_access_warning = true
+hide_world_writable_warning = true
+
+[tui.model_availability_nux]
+"gpt-5.5" = 4
+
+[windows]
+sandbox = "elevated"
+
+[profiles.safe]
+approval_policy = "on-request"
+sandbox_mode = "workspace-write"
+
+[profiles.skip-auth]
+approval_policy = "never"
+sandbox_mode = "workspace-write"
+
+# Keep hook trust state out of the public template because it is tied to local
+# absolute paths and local hook file hashes.
+[hooks.state]
