@@ -1,4 +1,4 @@
-# dotfiles
+# config-propmt
 
 Personal dotfiles, configuration notes, and rebuild prompts.
 
