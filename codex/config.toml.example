@@ -17,7 +17,7 @@ trust_level = "trusted"
 
 [tui]
 theme = "dark-daltonized"
-status_line = ["model-with-reasoning", "context-used", "primary-used-percent", "secondary-used-percent"]
+status_line = ["model-with-reasoning", "context-used", "five-hour-limit", "weekly-limit"]
 status_line_use_colors = false
 status_line_use_pi = true
 hide_full_access_warning = true
