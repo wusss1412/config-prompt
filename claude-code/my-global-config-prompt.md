@@ -42,23 +42,35 @@ settings.json 中:
 ═══════════════════════════════════════════════════════════
 
 settings.json 的 statusLine 挂一个自定义脚本,常驻显示:
-  当前模型名 + 上下文使用百分比 + 直观进度条 + 本会话累计 token + 5h 配额重置时间。
+  当前模型名 + 上下文使用百分比 + 直观进度条 + 当前上下文 token + 5h 配额重置时间。
 
-Windows 用 PowerShell(.ps1),类 Unix 用 bash/python 都可以。
-脚本放在用户级 .claude/ 目录下,statusLine.command 指过去即可。
+**运行时选 Node,不要选 PowerShell**(Windows 实测教训):
+- Windows PowerShell 冷启动 ~300ms,加上脚本本体 ~150ms,端到端 ~480ms,
+  会被 Claude Code 的 statusLine 超时(数百毫秒级)吃掉,**状态栏整条不渲染,
+  只剩 Claude Code 内置的 "bypass permissions on" 之类提示**。
+- Node 冷启动 ~100ms,端到端 ~150ms 稳进窗口。settings.json 里:
+    "command": "\"D:/Program Files/nodejs/node.exe\" \"C:/Users/ws/.claude/statusline.js\""
+  路径含空格务必整段加引号,Claude Code 才能正确启动。
+- 类 Unix 系统选 bash/python 都可以,核心是冷启动要快。
+- 脚本放在用户级 .claude/ 目录下,statusLine.command 指过去即可。
 
-实现要点(非显然,容易踩坑):
-- Claude Code 通过 stdin 传给 statusLine 脚本的 JSON **不包含** context_window /
-  total_input_tokens / rate_limits 这类字段。直接读这些字段会拿到 null,
-  状态栏只会显示 "n/a"。
-- 正确做法:从 stdin JSON 的 transcript_path 字段定位本会话的 .jsonl,
-  遍历其中 type=="assistant" 的行,取 message.usage 字段。
-  当前上下文占用 ≈ input_tokens + cache_creation_input_tokens
-                  + cache_read_input_tokens + output_tokens(取最后一条 assistant 的 usage)。
-  累计 token = 全部 assistant 行的 input/output 求和。
-- 上下文窗口大小按模型族判断,Claude 4.x 默认 200k,如启用 1M tier 自行调整。
+字段获取顺序(双路径):
+1. 快路径:Claude Code 较新版本会在 stdin JSON 里传 context_window
+   (含 used_percentage / context_window_size / current_usage / total_input_tokens 等)
+   和 rate_limits.five_hour。优先读这些,零文件 I/O。
+2. 兜底:**老版本或某些场景下 context_window 字段缺失**,此时从 transcript_path
+   定位本会话 .jsonl,**倒着扫**到第一条 type=="assistant" 且 message.usage 存在的行,
+   当前上下文占用 ≈ input_tokens + cache_creation_input_tokens
+                  + cache_read_input_tokens + output_tokens。
+   不要正向遍历全文件,长会话会拖慢。
+
+其它要点:
+- 上下文窗口大小:Claude 4.x 默认 200k,启用 1M tier 自行调整。
 - 百分比 = 当前占用 / 上下文窗口 * 100。
+- 5h 配额若 stdin 给了 rate_limits.five_hour 就用真值,否则按 transcript mtime + 5h 估算。
 - 任何异常都要降级为 "n/a" 输出,绝不能阻塞或抛错,否则状态栏整条消失。
+- 调试期可在脚本入口把 stdin 原文 append 到一个 50KB 滚动日志,
+  排查 "Claude Code 到底传了什么字段"。问题修完务必移除日志写入。
 
 ═══════════════════════════════════════════════════════════
 4. SessionEnd 钩子:自动清理"垃圾会话"
