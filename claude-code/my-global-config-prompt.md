@@ -42,10 +42,23 @@ settings.json 中:
 ═══════════════════════════════════════════════════════════
 
 settings.json 的 statusLine 挂一个自定义脚本,常驻显示:
-  当前模型名 + 上下文使用百分比 + 直观进度条。
+  当前模型名 + 上下文使用百分比 + 直观进度条 + 本会话累计 token + 5h 配额重置时间。
 
 Windows 用 PowerShell(.ps1),类 Unix 用 bash/python 都可以。
 脚本放在用户级 .claude/ 目录下,statusLine.command 指过去即可。
+
+实现要点(非显然,容易踩坑):
+- Claude Code 通过 stdin 传给 statusLine 脚本的 JSON **不包含** context_window /
+  total_input_tokens / rate_limits 这类字段。直接读这些字段会拿到 null,
+  状态栏只会显示 "n/a"。
+- 正确做法:从 stdin JSON 的 transcript_path 字段定位本会话的 .jsonl,
+  遍历其中 type=="assistant" 的行,取 message.usage 字段。
+  当前上下文占用 ≈ input_tokens + cache_creation_input_tokens
+                  + cache_read_input_tokens + output_tokens(取最后一条 assistant 的 usage)。
+  累计 token = 全部 assistant 行的 input/output 求和。
+- 上下文窗口大小按模型族判断,Claude 4.x 默认 200k,如启用 1M tier 自行调整。
+- 百分比 = 当前占用 / 上下文窗口 * 100。
+- 任何异常都要降级为 "n/a" 输出,绝不能阻塞或抛错,否则状态栏整条消失。
 
 ═══════════════════════════════════════════════════════════
 4. SessionEnd 钩子:自动清理"垃圾会话"
