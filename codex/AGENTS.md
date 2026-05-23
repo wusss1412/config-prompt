@@ -59,3 +59,16 @@ These rules apply when editing Word `.docx` thesis or academic documents, especi
   - visible citation numbers match the target reference items.
 - If a DOCX output shows unexpected content movement, such as section text appearing under the wrong heading, stop and rebuild from the original document base instead of patching around the corrupted output.
 - Do not rely on file size, visual spot checks, or successful ZIP opening as proof of correctness. Run structural XML checks and report the exact validation results.
+
+### DOCX Mistake Log And Required Countermeasures
+
+- Mistake: replacing an entire paragraph as plain text can flatten Word run-level formatting, including subscripts, superscripts, formula variables, field codes, and cross-reference formatting.
+  Countermeasure: before editing a paragraph, inspect its `w:r` structure. If it contains multiple runs, `w:vertAlign`, `w:fldChar`, `w:instrText`, `w:object`, or math elements, do not replace it wholesale. Preserve the original runs and make only targeted text changes, or add new content as a separate paragraph cloned from a compatible style.
+- Mistake: after deleting figures, leaving正文 references such as `如图4.6所示` creates broken internal logic even if the image object and caption are gone.
+  Countermeasure: after any figure/table deletion or insertion, scan all `图X.X` and `表X.X` references in `word/document.xml`; verify every reference has a matching caption and every caption has the expected nearby image/table object.
+- Mistake: inserting a new figure without immediately validating image relationships can leave broken media targets or mismatched captions.
+  Countermeasure: validate `word/_rels/document.xml.rels`, `[Content_Types].xml`, and every `a:blip/@r:embed` target after insertion.
+- Mistake: fixing one visible issue and stopping early can miss unrelated text discontinuities introduced by previous edits.
+  Countermeasure: run a full-document text scan for figure/table references, obviously truncated sentences, and edited-section continuity before declaring completion.
+- Mistake: saying a DOCX was edited with ZIP/XML is not enough; the editing strategy must also be conservative at the run level.
+  Countermeasure: report both the parsing method and the preservation method, including whether edited paragraphs preserved original runs or were intentionally added as new paragraphs.
