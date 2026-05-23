@@ -39,3 +39,23 @@ These rules apply to all Codex sessions unless the user explicitly overrides the
 - For each key output file, include:
   - Output path
   - File purpose
+
+## DOCX Editing Rules Learned From Citation-Rebuild Errors
+
+These rules apply when editing Word `.docx` thesis or academic documents, especially when changing references, citations, formulas, figures, or cross-references.
+
+- Treat `.docx` files as ZIP packages and inspect `word/document.xml` directly. Prefer Python `zipfile` plus `lxml.etree` for parsing and validation when available.
+- For citation or reference-list changes, use the user's original `.docx` as the base document. Do not rebuild or reorder body paragraphs unless the user explicitly asks for body rewriting.
+- Keep body edits minimal: replace only the reference-list region and update existing `REF _Ref...` field codes, visible citation numbers, and matching bookmark targets.
+- Do not flatten, recreate, or rewrite formula paragraphs. Formula parameters may be stored as separate Word runs, embedded objects, or special formatting rather than plain text.
+- Before declaring a DOCX edit complete, compare the output against the original file before the `参考文献` heading:
+  - body paragraph order and text, ignoring only intentional citation-number changes;
+  - paragraph properties (`w:pPr`);
+  - counts of `w:object`, `w:drawing`, subscript/superscript formatting, tabs, breaks, and section properties.
+- Validate citation integrity after edits:
+  - every visible citation is superscript when the original format uses superscript citations;
+  - every `REF _Ref...` target has a matching `w:bookmarkStart`;
+  - every reference bookmark is used when intended;
+  - visible citation numbers match the target reference items.
+- If a DOCX output shows unexpected content movement, such as section text appearing under the wrong heading, stop and rebuild from the original document base instead of patching around the corrupted output.
+- Do not rely on file size, visual spot checks, or successful ZIP opening as proof of correctness. Run structural XML checks and report the exact validation results.
