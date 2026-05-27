@@ -40,6 +40,16 @@ These rules apply to all Codex sessions unless the user explicitly overrides the
   - Output path
   - File purpose
 
+## Skill Organization Policy
+
+- Keep root-level active skills focused and intentional to avoid skills context budget pressure.
+- When a product, platform, method, or workflow family has two or more related skills, prefer one root-level grouped skill with child skills under `library/`.
+- Add a new skill to an existing group when it clearly belongs to that domain, and update the group skill's `SKILL.md` child workflow list.
+- Create a new grouped skill when the capability is likely to grow into a family.
+- Put a skill directly in the active root only when it is independent, broadly useful, or a foundational capability with no clear parent group.
+- Do not use `skills.disabled` as the primary grouping mechanism. Treat it only as an archive or temporary disabled area when explicitly needed.
+- Examples: `gsd`, `superpowers`, `vercel`, `supabase`, `atlassian`, `mcp-server-dev`, `telegram`, and `slack` should be grouped skills with internal `library/` child workflows.
+
 ## DOCX Editing Rules Learned From Citation-Rebuild Errors
 
 These rules apply when editing Word `.docx` thesis or academic documents, especially when changing references, citations, formulas, figures, or cross-references.
