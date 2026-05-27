@@ -128,11 +128,11 @@
 
 (6) Skills 自动加载范围必须保持精简
 
-Codex 用户全局 `skills` 根目录只保留近期高频使用或基础能力相关的技能，例如系统内置技能、Office 文档处理、引用检索、PPT/幻灯片、PDF、表格和网页测试类技能。
+Codex 用户全局 `skills` 根目录优先保留近期高频使用或基础能力相关的技能，例如系统内置技能、Office 文档处理、引用检索、PPT/幻灯片、PDF、表格和网页测试类技能；零散低频技能也可以按用户偏好保持 active，以换取更直接的自动触发。
 
-批量迁移、低频或领域专用技能不要直接堆在自动加载根目录；应保存在旁边的 disabled/归档目录中，需要使用时再移回 `skills` 根目录。
+同一体系的大量技能不要直接平铺在自动加载根目录；应整理为一个根级分组技能，并把具体子技能放在该分组技能内部的 `library/` 中。`skills.disabled` 只作为归档或临时停用区，不再作为主要分组机制。
 
-可以保留很小的自动加载路由技能，例如 `skill-index`，以及按能力域组织的分组技能，例如 `gsd`、`superpowers`、`vercel`。同一体系的大量子技能应放在分组技能内部的 `library/` 中，由该分组技能按需读取具体子技能的 `SKILL.md`；不要把同一体系的大量技能平铺在根级 `skills` 目录，也不要优先依赖 `skills.disabled` 下的分组索引。只有尚未归入分组技能的低频技能，才通过 disabled 总索引按需恢复单个技能。
+可以保留很小的自动加载路由技能，例如 `skill-index`，以及按能力域组织的分组技能，例如 `gsd`、`superpowers`、`vercel`。分组技能按需读取内部具体子技能的 `SKILL.md`；不要优先依赖 `skills.disabled` 下的分组索引。
 
 原因：根目录技能过多会挤占 skills 描述预算，触发“Skill descriptions were shortened to fit the 2% skills context budget”警告，并降低技能触发描述的可读性。
 
