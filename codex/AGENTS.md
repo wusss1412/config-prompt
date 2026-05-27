@@ -50,35 +50,8 @@ These rules apply to all Codex sessions unless the user explicitly overrides the
 - Do not use `skills.disabled` as the primary grouping mechanism. Treat it only as an archive or temporary disabled area when explicitly needed.
 - Examples: `gsd`, `superpowers`, `vercel`, `supabase`, `atlassian`, `mcp-server-dev`, `telegram`, and `slack` should be grouped skills with internal `library/` child workflows.
 
-## DOCX Editing Rules Learned From Citation-Rebuild Errors
+## DOCX Safety Policy
 
-These rules apply when editing Word `.docx` thesis or academic documents, especially when changing references, citations, formulas, figures, or cross-references.
-
-- Treat `.docx` files as ZIP packages and inspect `word/document.xml` directly. Prefer Python `zipfile` plus `lxml.etree` for parsing and validation when available.
-- For citation or reference-list changes, use the user's original `.docx` as the base document. Do not rebuild or reorder body paragraphs unless the user explicitly asks for body rewriting.
-- Keep body edits minimal: replace only the reference-list region and update existing `REF _Ref...` field codes, visible citation numbers, and matching bookmark targets.
-- Do not flatten, recreate, or rewrite formula paragraphs. Formula parameters may be stored as separate Word runs, embedded objects, or special formatting rather than plain text.
-- Before declaring a DOCX edit complete, compare the output against the original file before the `参考文献` heading:
-  - body paragraph order and text, ignoring only intentional citation-number changes;
-  - paragraph properties (`w:pPr`);
-  - counts of `w:object`, `w:drawing`, subscript/superscript formatting, tabs, breaks, and section properties.
-- Validate citation integrity after edits:
-  - every visible citation is superscript when the original format uses superscript citations;
-  - every `REF _Ref...` target has a matching `w:bookmarkStart`;
-  - every reference bookmark is used when intended;
-  - visible citation numbers match the target reference items.
-- If a DOCX output shows unexpected content movement, such as section text appearing under the wrong heading, stop and rebuild from the original document base instead of patching around the corrupted output.
-- Do not rely on file size, visual spot checks, or successful ZIP opening as proof of correctness. Run structural XML checks and report the exact validation results.
-
-### DOCX Mistake Log And Required Countermeasures
-
-- Mistake: replacing an entire paragraph as plain text can flatten Word run-level formatting, including subscripts, superscripts, formula variables, field codes, and cross-reference formatting.
-  Countermeasure: before editing a paragraph, inspect its `w:r` structure. If it contains multiple runs, `w:vertAlign`, `w:fldChar`, `w:instrText`, `w:object`, or math elements, do not replace it wholesale. Preserve the original runs and make only targeted text changes, or add new content as a separate paragraph cloned from a compatible style.
-- Mistake: after deleting figures, leaving正文 references such as `如图4.6所示` creates broken internal logic even if the image object and caption are gone.
-  Countermeasure: after any figure/table deletion or insertion, scan all `图X.X` and `表X.X` references in `word/document.xml`; verify every reference has a matching caption and every caption has the expected nearby image/table object.
-- Mistake: inserting a new figure without immediately validating image relationships can leave broken media targets or mismatched captions.
-  Countermeasure: validate `word/_rels/document.xml.rels`, `[Content_Types].xml`, and every `a:blip/@r:embed` target after insertion.
-- Mistake: fixing one visible issue and stopping early can miss unrelated text discontinuities introduced by previous edits.
-  Countermeasure: run a full-document text scan for figure/table references, obviously truncated sentences, and edited-section continuity before declaring completion.
-- Mistake: saying a DOCX was edited with ZIP/XML is not enough; the editing strategy must also be conservative at the run level.
-  Countermeasure: report both the parsing method and the preservation method, including whether edited paragraphs preserved original runs or were intentionally added as new paragraphs.
+- When editing `.docx` academic or thesis documents, use the `docx` skill and follow its conservative ZIP/XML editing and validation workflow.
+- Do not flatten complex Word runs, formulas, field codes, bookmarks, drawings, or cross-references.
+- Before declaring DOCX edits complete, run structural validation and report key validation results.
